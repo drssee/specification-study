@@ -9,25 +9,26 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class ProductSpecification {
 
-    // spec은 criteria 사용 predicate(criteria 동적쿼리 조건) 반환함
-    // JpaSpecificationExecutor 를 이용해 spec 실행
-
-    // spec을 사용하면 criteria를 이용해 동적 쿼리를 생성하는 셈임
-
-    public static Specification<Product> equalCategory(String category) {
-        return new Specification<Product>() {
+    public static Specification<Product> nameEqual(String name) {
+        return new Specification<Product> () {
             @Override
             public Predicate toPredicate(Root<Product> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                if (category == null) {
-                    return criteriaBuilder.conjunction(); // 항상 true
-                }
-                return criteriaBuilder.equal(root.get("category"), category);
+                return criteriaBuilder.equal(root.get("name"), name);
             }
         };
     }
 
-    // 넘어온 파라미터 크기 비교해서 동적쿼리 생성
-    public static Specification<Product> moreThan(double price) {
+    public static Specification<Product> priceEqual(int price) {
+        return new Specification<Product>() {
+            @Override
+            public Predicate toPredicate(Root<Product> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                return criteriaBuilder.equal(root.get("price"), price);
+            }
+        };
+    }
+
+
+    public static Specification<Product> priceMoreThan(int price) {
         return new Specification<Product>() {
             @Override
             public Predicate toPredicate(Root<Product> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -36,5 +37,15 @@ public class ProductSpecification {
         };
     }
 
-    // spec and or 사용법이랑 다른테이블이랑 조인해서 동적쿼리 짜는법
+    // 상품 이름과 가격을 and로 묶음
+    public static Specification<Product> equalNameAndPrice(String name, int price) {
+        return Specification.where(nameEqual(name)).and(priceEqual(price));
+    }
+
+    // 상품 이름과 가격을 or로 묶음
+    public static Specification<Product> equalNameOrPrice(String name, int price) {
+        return Specification.where(nameEqual(name)).or(priceEqual(price));
+    }
+
+    //상품 카테고리
 }
